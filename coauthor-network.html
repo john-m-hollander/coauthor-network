@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Co-Authorship Network</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #1e40af 50%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #bfdbfe;
+            font-size: 1.1rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .stat-label {
+            color: #93c5fd;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .canvas-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .canvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .canvas-header h2 {
+            color: #1e293b;
+            font-size: 1.5rem;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+        
+        .legend-dot.you {
+            background: #dc2626;
+        }
+        
+        .legend-dot.collab {
+            background: #60a5fa;
+        }
+        
+        canvas {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: grab;
+            background: #f9fafb;
+            display: block;
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        canvas:active {
+            cursor: grabbing;
+        }
+        
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+        
+        .info-panel {
+            margin-top: 20px;
+            padding: 25px;
+            background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+            border-radius: 8px;
+            border: 2px solid #3b82f6;
+            display: none;
+        }
+        
+        .info-panel.active {
+            display: block;
+        }
+        
+        .info-panel h3 {
+            color: #1e293b;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 6px;
+        }
+        
+        .info-item-label {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+        
+        .info-item-value {
+            color: #1e40af;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Co-Authorship Network</h1>
+            <p>Google Scholar Publications Analysis</p>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-label">Total Authors</div>
+                    <div class="stat-value" id="authorCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Collaborations</div>
+                    <div class="stat-value" id="collabCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Publications</div>
+                    <div class="stat-value">21</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <div class="canvas-header">
+                <h2>Interactive Network</h2>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-dot you"></div>
+                        <span>You</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot collab"></div>
+                        <span>Collaborators</span>
+                    </div>
+                </div>
+            </div>
+            
+            <canvas id="networkCanvas" width="1000" height="700"></canvas>
+            
+            <div class="controls">
+                <span>Click to select • Drag to move • Scroll to zoom</span>
+                <span>Thicker lines = more collaborations</span>
+            </div>
+            
+            <div class="info-panel" id="infoPanel">
+                <h3 id="selectedAuthor"></h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-item-label">Unique Collaborators</div>
+                        <div class="info-item-value" id="collabValue">0</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item-label">Total Papers</div>
+                        <div class="info-item-value" id="papersValue">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Network data
+        const networkData = {"authors": ["Lecci, Len", "Hollander, JOHN", "Key, DALE", "Keith, JULIAN", "Dark-Freudeman, Alissa", "Terry, Christian", "Fleming, Jason", "Hollander, John", "Bensadon, Benjamin", "Smith, E Halle", "Graesser, Art C", "Sabatini, John", "Hu, Xiangen", "Graesser, Art", "Huette, Stephanie", "Hasan, Mahbubul", "Deng, Lih Y", "Bowman, Dale", "Yang, Ching-Chi", "O'Reilly, Tenaha", "Greenberg, Daphne", "Frijters, Jan", "Graesser, Arthur C", "Olney, Andrew", "Zhang, Liang", "Lin, Jionghao", "Borchers, Conrad", "Cao, Meng", "Hollander, John M", "Weitekamp, Daniel", "Jain, Yoshee", "He, Amber", "Tang, Sunny", "Zapata-Rivera, Diego", "Forsyth, Carol", "Jiang, Yang", "Fountain, Caitlin", "Mohamed, Noraan A", "Espinosa-Hernandez, Graciela"], "coauthorships": [{"source": "Hollander, JOHN", "target": "Keith, JULIAN", "weight": 1}, {"source": "Hollander, JOHN", "target": "Key, DALE", "weight": 1}, {"source": "Hollander, JOHN", "target": "Lecci, Len", "weight": 1}, {"source": "Keith, JULIAN", "target": "Key, DALE", "weight": 1}, {"source": "Keith, JULIAN", "target": "Lecci, Len", "weight": 1}, {"source": "Key, DALE", "target": "Lecci, Len", "weight": 1}, {"source": "Bensadon, Benjamin", "target": "Dark-Freudeman, Alissa", "weight": 1}, {"source": "Bensadon, Benjamin", "target": "Fleming, Jason", "weight": 1}, {"source": "Bensadon, Benjamin", "target": "Hollander, John", "weight": 1}, {"source": "Bensadon, Benjamin", "target": "Terry, Christian", "weight": 1}, {"source": "Dark-Freudeman, Alissa", "target": "Fleming, Jason", "weight": 1}, {"source": "Dark-Freudeman, Alissa", "target": "Hollander, John", "weight": 2}, {"source": "Dark-Freudeman, Alissa", "target": "Terry, Christian", "weight": 1}, {"source": "Fleming, Jason", "target": "Hollander, John", "weight": 1}, {"source": "Fleming, Jason", "target": "Terry, Christian", "weight": 1}, {"source": "Hollander, John", "target": "Terry, Christian", "weight": 1}, {"source": "Graesser, Art C", "target": "Hollander, John", "weight": 1}, {"source": "Graesser, Art C", "target": "Hu, Xiangen", "weight": 1}, {"source": "Graesser, Art C", "target": "Sabatini, John", "weight": 1}, {"source": "Graesser, Art C", "target": "Smith, E Halle", "weight": 1}, {"source": "Hollander, John", "target": "Hu, Xiangen", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 11}, {"source": "Hollander, John", "target": "Smith, E Halle", "weight": 1}, {"source": "Hu, Xiangen", "target": "Sabatini, John", "weight": 1}, {"source": "Hu, Xiangen", "target": "Smith, E Halle", "weight": 1}, {"source": "Sabatini, John", "target": "Smith, E Halle", "weight": 1}, {"source": "Graesser, Art", "target": "Hollander, John", "weight": 3}, {"source": "Graesser, Art", "target": "Sabatini, John", "weight": 3}, {"source": "Hollander, John", "target": "Huette, Stephanie", "weight": 1}, {"source": "Bowman, Dale", "target": "Deng, Lih Y", "weight": 1}, {"source": "Bowman, Dale", "target": "Hasan, Mahbubul", "weight": 1}, {"source": "Bowman, Dale", "target": "Hollander, John", "weight": 1}, {"source": "Bowman, Dale", "target": "Sabatini, John", "weight": 1}, {"source": "Bowman, Dale", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Deng, Lih Y", "target": "Hasan, Mahbubul", "weight": 1}, {"source": "Deng, Lih Y", "target": "Hollander, John", "weight": 1}, {"source": "Deng, Lih Y", "target": "Sabatini, John", "weight": 1}, {"source": "Deng, Lih Y", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Hasan, Mahbubul", "target": "Hollander, John", "weight": 1}, {"source": "Hasan, Mahbubul", "target": "Sabatini, John", "weight": 1}, {"source": "Hasan, Mahbubul", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Sabatini, John", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Frijters, Jan", "target": "Graesser, Art", "weight": 1}, {"source": "Frijters, Jan", "target": "Greenberg, Daphne", "weight": 1}, {"source": "Frijters, Jan", "target": "Hollander, John", "weight": 1}, {"source": "Frijters, Jan", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Frijters, Jan", "target": "Sabatini, John", "weight": 1}, {"source": "Graesser, Art", "target": "Greenberg, Daphne", "weight": 1}, {"source": "Graesser, Art", "target": "Hollander, John", "weight": 1}, {"source": "Graesser, Art", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Graesser, Art", "target": "Sabatini, John", "weight": 1}, {"source": "Greenberg, Daphne", "target": "Hollander, John", "weight": 1}, {"source": "Greenberg, Daphne", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Greenberg, Daphne", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "O'Reilly, Tenaha", "target": "Sabatini, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Hollander, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "O'Reilly, Tenaha", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "Olney, Andrew", "weight": 3}, {"source": "Borchers, Conrad", "target": "Cao, Meng", "weight": 1}, {"source": "Borchers, Conrad", "target": "Hollander, John", "weight": 2}, {"source": "Borchers, Conrad", "target": "Hu, Xiangen", "weight": 1}, {"source": "Borchers, Conrad", "target": "Lin, Jionghao", "weight": 1}, {"source": "Borchers, Conrad", "target": "Sabatini, John", "weight": 2}, {"source": "Borchers, Conrad", "target": "Zhang, Liang", "weight": 2}, {"source": "Cao, Meng", "target": "Hollander, John", "weight": 2}, {"source": "Cao, Meng", "target": "Hu, Xiangen", "weight": 1}, {"source": "Cao, Meng", "target": "Lin, Jionghao", "weight": 1}, {"source": "Cao, Meng", "target": "Sabatini, John", "weight": 2}, {"source": "Cao, Meng", "target": "Zhang, Liang", "weight": 2}, {"source": "Hollander, John", "target": "Hu, Xiangen", "weight": 1}, {"source": "Hollander, John", "target": "Lin, Jionghao", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 2}, {"source": "Hollander, John", "target": "Zhang, Liang", "weight": 2}, {"source": "Hu, Xiangen", "target": "Lin, Jionghao", "weight": 1}, {"source": "Hu, Xiangen", "target": "Sabatini, John", "weight": 1}, {"source": "Hu, Xiangen", "target": "Zhang, Liang", "weight": 1}, {"source": "Lin, Jionghao", "target": "Sabatini, John", "weight": 1}, {"source": "Lin, Jionghao", "target": "Zhang, Liang", "weight": 1}, {"source": "Sabatini, John", "target": "Zhang, Liang", "weight": 2}, {"source": "Cao, Meng", "target": "Graesser, Arthur C", "weight": 1}, {"source": "Cao, Meng", "target": "Hollander, John", "weight": 1}, {"source": "Cao, Meng", "target": "Hu, Xiangen", "weight": 1}, {"source": "Cao, Meng", "target": "Lin, Jionghao", "weight": 1}, {"source": "Cao, Meng", "target": "Sabatini, John", "weight": 1}, {"source": "Cao, Meng", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Cao, Meng", "target": "Zhang, Liang", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Hollander, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Hu, Xiangen", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Lin, Jionghao", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Sabatini, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Zhang, Liang", "weight": 1}, {"source": "Hollander, John", "target": "Hu, Xiangen", "weight": 1}, {"source": "Hollander, John", "target": "Lin, Jionghao", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Hollander, John", "target": "Zhang, Liang", "weight": 1}, {"source": "Hu, Xiangen", "target": "Lin, Jionghao", "weight": 1}, {"source": "Hu, Xiangen", "target": "Sabatini, John", "weight": 1}, {"source": "Hu, Xiangen", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Hu, Xiangen", "target": "Zhang, Liang", "weight": 1}, {"source": "Lin, Jionghao", "target": "Sabatini, John", "weight": 1}, {"source": "Lin, Jionghao", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Lin, Jionghao", "target": "Zhang, Liang", "weight": 1}, {"source": "Sabatini, John", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Sabatini, John", "target": "Zhang, Liang", "weight": 1}, {"source": "Weitekamp, Daniel", "target": "Zhang, Liang", "weight": 1}, {"source": "He, Amber", "target": "Hollander, John", "weight": 1}, {"source": "He, Amber", "target": "Jain, Yoshee", "weight": 1}, {"source": "He, Amber", "target": "Sabatini, John", "weight": 1}, {"source": "He, Amber", "target": "Tang, Sunny", "weight": 1}, {"source": "He, Amber", "target": "Zhang, Liang", "weight": 1}, {"source": "Hollander, John", "target": "Jain, Yoshee", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "Tang, Sunny", "weight": 1}, {"source": "Hollander, John", "target": "Zhang, Liang", "weight": 1}, {"source": "Jain, Yoshee", "target": "Sabatini, John", "weight": 1}, {"source": "Jain, Yoshee", "target": "Tang, Sunny", "weight": 1}, {"source": "Jain, Yoshee", "target": "Zhang, Liang", "weight": 1}, {"source": "Sabatini, John", "target": "Tang, Sunny", "weight": 1}, {"source": "Sabatini, John", "target": "Zhang, Liang", "weight": 1}, {"source": "Tang, Sunny", "target": "Zhang, Liang", "weight": 1}, {"source": "Forsyth, Carol", "target": "Graesser, Arthur C", "weight": 1}, {"source": "Forsyth, Carol", "target": "Hollander, John", "weight": 1}, {"source": "Forsyth, Carol", "target": "Hu, Xiangen", "weight": 1}, {"source": "Forsyth, Carol", "target": "Jiang, Yang", "weight": 1}, {"source": "Forsyth, Carol", "target": "Lin, Jionghao", "weight": 1}, {"source": "Forsyth, Carol", "target": "Sabatini, John", "weight": 1}, {"source": "Forsyth, Carol", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Forsyth, Carol", "target": "Zhang, Liang", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Hollander, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Hu, Xiangen", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Jiang, Yang", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Lin, Jionghao", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Sabatini, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Zhang, Liang", "weight": 1}, {"source": "Hollander, John", "target": "Hu, Xiangen", "weight": 1}, {"source": "Hollander, John", "target": "Jiang, Yang", "weight": 1}, {"source": "Hollander, John", "target": "Lin, Jionghao", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Hollander, John", "target": "Zhang, Liang", "weight": 1}, {"source": "Hu, Xiangen", "target": "Jiang, Yang", "weight": 1}, {"source": "Hu, Xiangen", "target": "Lin, Jionghao", "weight": 1}, {"source": "Hu, Xiangen", "target": "Sabatini, John", "weight": 1}, {"source": "Hu, Xiangen", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Hu, Xiangen", "target": "Zhang, Liang", "weight": 1}, {"source": "Jiang, Yang", "target": "Lin, Jionghao", "weight": 1}, {"source": "Jiang, Yang", "target": "Sabatini, John", "weight": 1}, {"source": "Jiang, Yang", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Jiang, Yang", "target": "Zhang, Liang", "weight": 1}, {"source": "Lin, Jionghao", "target": "Sabatini, John", "weight": 1}, {"source": "Lin, Jionghao", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Lin, Jionghao", "target": "Zhang, Liang", "weight": 1}, {"source": "Sabatini, John", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Sabatini, John", "target": "Zhang, Liang", "weight": 1}, {"source": "Zapata-Rivera, Diego", "target": "Zhang, Liang", "weight": 1}, {"source": "Espinosa-Hernandez, Graciela", "target": "Fountain, Caitlin", "weight": 1}, {"source": "Espinosa-Hernandez, Graciela", "target": "Hollander, John", "weight": 1}, {"source": "Espinosa-Hernandez, Graciela", "target": "Mohamed, Noraan A", "weight": 1}, {"source": "Fountain, Caitlin", "target": "Hollander, John", "weight": 1}, {"source": "Fountain, Caitlin", "target": "Mohamed, Noraan A", "weight": 1}, {"source": "Hollander, John", "target": "Mohamed, Noraan A", "weight": 1}], "author_papers": {"Lecci, Len": 1, "Hollander, JOHN": 1, "Key, DALE": 1, "Keith, JULIAN": 1, "Dark-Freudeman, Alissa": 2, "Terry, Christian": 1, "Fleming, Jason": 1, "Hollander, John": 21, "Bensadon, Benjamin": 1, "Smith, E Halle": 1, "Graesser, Art C": 1, "Sabatini, John": 14, "Hu, Xiangen": 4, "Graesser, Art": 3, "Huette, Stephanie": 1, "Hasan, Mahbubul": 1, "Deng, Lih Y": 1, "Bowman, Dale": 1, "Yang, Ching-Chi": 1, "O'Reilly, Tenaha": 2, "Greenberg, Daphne": 1, "Frijters, Jan": 1, "Graesser, Arthur C": 3, "Olney, Andrew": 3, "Zhang, Liang": 4, "Lin, Jionghao": 3, "Borchers, Conrad": 2, "Cao, Meng": 2, "Hollander, John M": 1, "Weitekamp, Daniel": 1, "Jain, Yoshee": 1, "He, Amber": 1, "Tang, Sunny": 1, "Zapata-Rivera, Diego": 1, "Forsyth, Carol": 1, "Jiang, Yang": 1, "Fountain, Caitlin": 1, "Mohamed, Noraan A": 1, "Espinosa-Hernandez, Graciela": 1}};
+
+        // Initialize network
+        const johnVariants = ['Hollander, John', 'Hollander, JOHN', 'Hollander, John M'];
+        const mainJohn = 'Hollander, John';
+        
+        // Merge collaborations
+        const mergedCollabs = new Map();
+        networkData.coauthorships.forEach(edge => {
+            let source = johnVariants.includes(edge.source) ? mainJohn : edge.source;
+            let target = johnVariants.includes(edge.target) ? mainJohn : edge.target;
+            const key = [source, target].sort().join('|');
+            mergedCollabs.set(key, (mergedCollabs.get(key) || 0) + edge.weight);
+        });
+        
+        // Create nodes
+        const uniqueAuthors = Array.from(new Set(
+            networkData.authors.map(a => johnVariants.includes(a) ? mainJohn : a)
+        ));
+        
+        const nodes = uniqueAuthors.map((author, i) => {
+            const angle = (i / uniqueAuthors.length) * Math.PI * 2;
+            const radius = 200;
+            return {
+                id: author,
+                label: author,
+                papers: networkData.author_papers[author] || 0,
+                x: Math.cos(angle) * radius,
+                y: Math.sin(angle) * radius,
+                vx: 0,
+                vy: 0,
+                isJohn: author === mainJohn
+            };
+        });
+        
+        const edges = Array.from(mergedCollabs.entries()).map(([key, weight]) => {
+            const [source, target] = key.split('|');
+            return { source, target, weight };
+        });
+        
+        // Update stats
+        document.getElementById('authorCount').textContent = nodes.length;
+        document.getElementById('collabCount').textContent = edges.length;
+        
+        // Canvas setup
+        const canvas = document.getElementById('networkCanvas');
+        const ctx = canvas.getContext('2d');
+        let transform = { x: 500, y: 350, scale: 1 };
+        let selectedNode = null;
+        let hoveredNode = null;
+        let isDragging = false;
+        let draggedNode = null;
+        
+        // Force simulation
+        function simulate() {
+            const alpha = 0.05;
+            const repulsion = 15000;
+            const attraction = 0.008;
+            const damping = 0.85;
+            
+            // Repulsion
+            nodes.forEach(node => {
+                nodes.forEach(other => {
+                    if (node === other) return;
+                    const dx = node.x - other.x;
+                    const dy = node.y - other.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    const force = repulsion / (dist * dist);
+                    node.vx += (dx / dist) * force;
+                    node.vy += (dy / dist) * force;
+                });
+            });
+            
+            // Attraction
+            edges.forEach(edge => {
+                const source = nodes.find(n => n.id === edge.source);
+                const target = nodes.find(n => n.id === edge.target);
+                if (!source || !target) return;
+                
+                const dx = target.x - source.x;
+                const dy = target.y - source.y;
+                const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                const force = dist * attraction * Math.log(edge.weight + 1);
+                
+                source.vx += (dx / dist) * force;
+                source.vy += (dy / dist) * force;
+                target.vx -= (dx / dist) * force;
+                target.vy -= (dy / dist) * force;
+            });
+            
+            // Update positions
+            nodes.forEach(node => {
+                if (draggedNode && node.id === draggedNode.id) return;
+                node.vx *= damping;
+                node.vy *= damping;
+                node.x += node.vx * alpha;
+                node.y += node.vy * alpha;
+            });
+        }
+        
+        // Render
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(transform.x, transform.y);
+            ctx.scale(transform.scale, transform.scale);
+            
+            // Draw edges
+            edges.forEach(edge => {
+                const source = nodes.find(n => n.id === edge.source);
+                const target = nodes.find(n => n.id === edge.target);
+                if (!source || !target) return;
+                
+                const opacity = 0.3 + (edge.weight / 15) * 0.6;
+                ctx.strokeStyle = `rgba(100, 116, 139, ${opacity})`;
+                const calculatedWidth = 1 + (edge.weight * 0.8);
+                ctx.lineWidth = Math.min(calculatedWidth, 8);
+                ctx.beginPath();
+                ctx.moveTo(source.x, source.y);
+                ctx.lineTo(target.x, target.y);
+                ctx.stroke();
+            });
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                const radius = node.isJohn ? 18 : 6 + Math.sqrt(node.papers) * 2.5;
+                const isHovered = hoveredNode === node.id;
+                const isSelected = selectedNode === node.id;
+                
+                let isConnected = false;
+                if (selectedNode) {
+                    isConnected = edges.some(e => 
+                        (e.source === selectedNode && e.target === node.id) ||
+                        (e.target === selectedNode && e.source === node.id)
+                    );
+                }
+                
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+                
+                if (node.isJohn) {
+                    ctx.fillStyle = '#dc2626';
+                } else if (isSelected) {
+                    ctx.fillStyle = '#3b82f6';
+                } else if (isHovered || isConnected) {
+                    ctx.fillStyle = '#60a5fa';
+                } else {
+                    ctx.fillStyle = '#93c5fd';
+                }
+                
+                ctx.fill();
+                ctx.strokeStyle = node.isJohn ? '#991b1b' : '#1e40af';
+                ctx.lineWidth = isSelected || isHovered ? 3 : 2;
+                ctx.stroke();
+                
+                // Labels - always visible
+                ctx.fillStyle = '#1e293b';
+                ctx.font = node.isJohn ? 'bold 14px sans-serif' : 'bold 11px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(node.label, node.x, node.y - radius - 8);
+            });
+            
+            ctx.restore();
+        }
+        
+        // Animation loop
+        function animate() {
+            simulate();
+            render();
+            requestAnimationFrame(animate);
+        }
+        animate();
+        
+        // Mouse handling
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (e.clientX - rect.left - transform.x) / transform.scale,
+                y: (e.clientY - rect.top - transform.y) / transform.scale
+            };
+        }
+        
+        canvas.addEventListener('mousemove', (e) => {
+            const pos = getMousePos(e);
+            
+            if (isDragging && draggedNode) {
+                draggedNode.x = pos.x;
+                draggedNode.y = pos.y;
+                draggedNode.vx = 0;
+                draggedNode.vy = 0;
+                return;
+            }
+            
+            hoveredNode = null;
+            for (const node of nodes) {
+                const radius = node.isJohn ? 18 : 6 + Math.sqrt(node.papers) * 2.5;
+                const dist = Math.sqrt((pos.x - node.x) ** 2 + (pos.y - node.y) ** 2);
+                if (dist < radius) {
+                    hoveredNode = node.id;
+                    break;
+                }
+            }
+        });
+        
+        canvas.addEventListener('mousedown', (e) => {
+            const pos = getMousePos(e);
+            
+            for (const node of nodes) {
+                const radius = node.isJohn ? 18 : 6 + Math.sqrt(node.papers) * 2.5;
+                const dist = Math.sqrt((pos.x - node.x) ** 2 + (pos.y - node.y) ** 2);
+                if (dist < radius) {
+                    isDragging = true;
+                    draggedNode = node;
+                    break;
+                }
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+            draggedNode = null;
+        });
+        
+        canvas.addEventListener('click', (e) => {
+            const pos = getMousePos(e);
+            
+            selectedNode = null;
+            for (const node of nodes) {
+                const radius = node.isJohn ? 18 : 6 + Math.sqrt(node.papers) * 2.5;
+                const dist = Math.sqrt((pos.x - node.x) ** 2 + (pos.y - node.y) ** 2);
+                if (dist < radius) {
+                    selectedNode = node.id;
+                    
+                    // Update info panel
+                    const collabs = edges.filter(e => 
+                        e.source === selectedNode || e.target === selectedNode
+                    );
+                    const totalPapers = collabs.reduce((sum, e) => sum + e.weight, 0);
+                    
+                    document.getElementById('selectedAuthor').textContent = selectedNode;
+                    document.getElementById('collabValue').textContent = collabs.length;
+                    document.getElementById('papersValue').textContent = totalPapers;
+                    document.getElementById('infoPanel').classList.add('active');
+                    break;
+                }
+            }
+            
+            if (!selectedNode) {
+                document.getElementById('infoPanel').classList.remove('active');
+            }
+        });
+        
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            transform.scale = Math.max(0.3, Math.min(3, transform.scale * delta));
+        });
+    </script>
+</body>
+</html>
