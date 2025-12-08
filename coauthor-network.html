@@ -109,20 +109,20 @@
 <body>
     <div class="container">
         <div class="canvas-container">
-            <div class="canvas-header">
-                <h2>Interactive Network</h2>
-            </div>
-            
             <canvas id="networkCanvas" width="1000" height="700"></canvas>
             
             <div class="controls">
-                <span>Click to select • Drag to move • Scroll to zoom</span>
-                <span>Thicker lines = more collaborations</span>
+                <span>Click node to select • Drag canvas to pan • Scroll to zoom</span>
+                <span>Colors represent institutional affiliations</span>
             </div>
             
             <div class="info-panel" id="infoPanel">
                 <h3 id="selectedAuthor"></h3>
                 <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-item-label">Institution</div>
+                        <div class="info-item-value" id="institutionValue" style="font-size: 1rem;">-</div>
+                    </div>
                     <div class="info-item">
                         <div class="info-item-label">Unique Collaborators</div>
                         <div class="info-item-value" id="collabValue">0</div>
@@ -138,61 +138,31 @@
 
     <script>
         // Network data
-        const networkData = {"authors": ["Lecci, Len", "Hollander, JOHN", "Key, DALE", "Keith, JULIAN", "Dark-Freudeman, Alissa", "Terry, Christian", "Fleming, Jason", "Hollander, John", "Bensadon, Benjamin", "Smith, E Halle", "Graesser, Art C", "Sabatini, John", "Hu, Xiangen", "Graesser, Art", "Huette, Stephanie", "Hasan, Mahbubul", "Deng, Lih Y", "Bowman, Dale", "Yang, Ching-Chi", "O'Reilly, Tenaha", "Greenberg, Daphne", "Frijters, Jan", "Graesser, Arthur C", "Olney, Andrew", "Zhang, Liang", "Lin, Jionghao", "Borchers, Conrad", "Cao, Meng", "Hollander, John M", "Weitekamp, Daniel", "Jain, Yoshee", "He, Amber", "Tang, Sunny", "Zapata-Rivera, Diego", "Forsyth, Carol", "Jiang, Yang", "Fountain, Caitlin", "Mohamed, Noraan A", "Espinosa-Hernandez, Graciela"], "coauthorships": [{"source": "Hollander, JOHN", "target": "Keith, JULIAN", "weight": 1}, {"source": "Hollander, JOHN", "target": "Key, DALE", "weight": 1}, {"source": "Hollander, JOHN", "target": "Lecci, Len", "weight": 1}, {"source": "Keith, JULIAN", "target": "Key, DALE", "weight": 1}, {"source": "Keith, JULIAN", "target": "Lecci, Len", "weight": 1}, {"source": "Key, DALE", "target": "Lecci, Len", "weight": 1}, {"source": "Bensadon, Benjamin", "target": "Dark-Freudeman, Alissa", "weight": 1}, {"source": "Bensadon, Benjamin", "target": "Fleming, Jason", "weight": 1}, {"source": "Bensadon, Benjamin", "target": "Hollander, John", "weight": 1}, {"source": "Bensadon, Benjamin", "target": "Terry, Christian", "weight": 1}, {"source": "Dark-Freudeman, Alissa", "target": "Fleming, Jason", "weight": 1}, {"source": "Dark-Freudeman, Alissa", "target": "Hollander, John", "weight": 2}, {"source": "Dark-Freudeman, Alissa", "target": "Terry, Christian", "weight": 1}, {"source": "Fleming, Jason", "target": "Hollander, John", "weight": 1}, {"source": "Fleming, Jason", "target": "Terry, Christian", "weight": 1}, {"source": "Hollander, John", "target": "Terry, Christian", "weight": 1}, {"source": "Graesser, Art C", "target": "Hollander, John", "weight": 1}, {"source": "Graesser, Art C", "target": "Hu, Xiangen", "weight": 1}, {"source": "Graesser, Art C", "target": "Sabatini, John", "weight": 1}, {"source": "Graesser, Art C", "target": "Smith, E Halle", "weight": 1}, {"source": "Hollander, John", "target": "Hu, Xiangen", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 11}, {"source": "Hollander, John", "target": "Smith, E Halle", "weight": 1}, {"source": "Hu, Xiangen", "target": "Sabatini, John", "weight": 1}, {"source": "Hu, Xiangen", "target": "Smith, E Halle", "weight": 1}, {"source": "Sabatini, John", "target": "Smith, E Halle", "weight": 1}, {"source": "Graesser, Art", "target": "Hollander, John", "weight": 3}, {"source": "Graesser, Art", "target": "Sabatini, John", "weight": 3}, {"source": "Hollander, John", "target": "Huette, Stephanie", "weight": 1}, {"source": "Bowman, Dale", "target": "Deng, Lih Y", "weight": 1}, {"source": "Bowman, Dale", "target": "Hasan, Mahbubul", "weight": 1}, {"source": "Bowman, Dale", "target": "Hollander, John", "weight": 1}, {"source": "Bowman, Dale", "target": "Sabatini, John", "weight": 1}, {"source": "Bowman, Dale", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Deng, Lih Y", "target": "Hasan, Mahbubul", "weight": 1}, {"source": "Deng, Lih Y", "target": "Hollander, John", "weight": 1}, {"source": "Deng, Lih Y", "target": "Sabatini, John", "weight": 1}, {"source": "Deng, Lih Y", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Hasan, Mahbubul", "target": "Hollander, John", "weight": 1}, {"source": "Hasan, Mahbubul", "target": "Sabatini, John", "weight": 1}, {"source": "Hasan, Mahbubul", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Sabatini, John", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Frijters, Jan", "target": "Graesser, Art", "weight": 1}, {"source": "Frijters, Jan", "target": "Greenberg, Daphne", "weight": 1}, {"source": "Frijters, Jan", "target": "Hollander, John", "weight": 1}, {"source": "Frijters, Jan", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Frijters, Jan", "target": "Sabatini, John", "weight": 1}, {"source": "Graesser, Art", "target": "Greenberg, Daphne", "weight": 1}, {"source": "Graesser, Art", "target": "Hollander, John", "weight": 1}, {"source": "Graesser, Art", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Graesser, Art", "target": "Sabatini, John", "weight": 1}, {"source": "Greenberg, Daphne", "target": "Hollander, John", "weight": 1}, {"source": "Greenberg, Daphne", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Greenberg, Daphne", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "O'Reilly, Tenaha", "target": "Sabatini, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Hollander, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "O'Reilly, Tenaha", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "Olney, Andrew", "weight": 3}, {"source": "Borchers, Conrad", "target": "Cao, Meng", "weight": 1}, {"source": "Borchers, Conrad", "target": "Hollander, John", "weight": 2}, {"source": "Borchers, Conrad", "target": "Hu, Xiangen", "weight": 1}, {"source": "Borchers, Conrad", "target": "Lin, Jionghao", "weight": 1}, {"source": "Borchers, Conrad", "target": "Sabatini, John", "weight": 2}, {"source": "Borchers, Conrad", "target": "Zhang, Liang", "weight": 2}, {"source": "Cao, Meng", "target": "Hollander, John", "weight": 2}, {"source": "Cao, Meng", "target": "Hu, Xiangen", "weight": 1}, {"source": "Cao, Meng", "target": "Lin, Jionghao", "weight": 1}, {"source": "Cao, Meng", "target": "Sabatini, John", "weight": 2}, {"source": "Cao, Meng", "target": "Zhang, Liang", "weight": 2}, {"source": "Hollander, John", "target": "Hu, Xiangen", "weight": 1}, {"source": "Hollander, John", "target": "Lin, Jionghao", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 2}, {"source": "Hollander, John", "target": "Zhang, Liang", "weight": 2}, {"source": "Hu, Xiangen", "target": "Lin, Jionghao", "weight": 1}, {"source": "Hu, Xiangen", "target": "Sabatini, John", "weight": 1}, {"source": "Hu, Xiangen", "target": "Zhang, Liang", "weight": 1}, {"source": "Lin, Jionghao", "target": "Sabatini, John", "weight": 1}, {"source": "Lin, Jionghao", "target": "Zhang, Liang", "weight": 1}, {"source": "Sabatini, John", "target": "Zhang, Liang", "weight": 2}, {"source": "Cao, Meng", "target": "Graesser, Arthur C", "weight": 1}, {"source": "Cao, Meng", "target": "Hollander, John", "weight": 1}, {"source": "Cao, Meng", "target": "Hu, Xiangen", "weight": 1}, {"source": "Cao, Meng", "target": "Lin, Jionghao", "weight": 1}, {"source": "Cao, Meng", "target": "Sabatini, John", "weight": 1}, {"source": "Cao, Meng", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Cao, Meng", "target": "Zhang, Liang", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Hollander, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Hu, Xiangen", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Lin, Jionghao", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Sabatini, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Zhang, Liang", "weight": 1}, {"source": "Hollander, John", "target": "Hu, Xiangen", "weight": 1}, {"source": "Hollander, John", "target": "Lin, Jionghao", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Hollander, John", "target": "Zhang, Liang", "weight": 1}, {"source": "Hu, Xiangen", "target": "Lin, Jionghao", "weight": 1}, {"source": "Hu, Xiangen", "target": "Sabatini, John", "weight": 1}, {"source": "Hu, Xiangen", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Hu, Xiangen", "target": "Zhang, Liang", "weight": 1}, {"source": "Lin, Jionghao", "target": "Sabatini, John", "weight": 1}, {"source": "Lin, Jionghao", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Lin, Jionghao", "target": "Zhang, Liang", "weight": 1}, {"source": "Sabatini, John", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Sabatini, John", "target": "Zhang, Liang", "weight": 1}, {"source": "Weitekamp, Daniel", "target": "Zhang, Liang", "weight": 1}, {"source": "He, Amber", "target": "Hollander, John", "weight": 1}, {"source": "He, Amber", "target": "Jain, Yoshee", "weight": 1}, {"source": "He, Amber", "target": "Sabatini, John", "weight": 1}, {"source": "He, Amber", "target": "Tang, Sunny", "weight": 1}, {"source": "He, Amber", "target": "Zhang, Liang", "weight": 1}, {"source": "Hollander, John", "target": "Jain, Yoshee", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "Tang, Sunny", "weight": 1}, {"source": "Hollander, John", "target": "Zhang, Liang", "weight": 1}, {"source": "Jain, Yoshee", "target": "Sabatini, John", "weight": 1}, {"source": "Jain, Yoshee", "target": "Tang, Sunny", "weight": 1}, {"source": "Jain, Yoshee", "target": "Zhang, Liang", "weight": 1}, {"source": "Sabatini, John", "target": "Tang, Sunny", "weight": 1}, {"source": "Sabatini, John", "target": "Zhang, Liang", "weight": 1}, {"source": "Tang, Sunny", "target": "Zhang, Liang", "weight": 1}, {"source": "Forsyth, Carol", "target": "Graesser, Arthur C", "weight": 1}, {"source": "Forsyth, Carol", "target": "Hollander, John", "weight": 1}, {"source": "Forsyth, Carol", "target": "Hu, Xiangen", "weight": 1}, {"source": "Forsyth, Carol", "target": "Jiang, Yang", "weight": 1}, {"source": "Forsyth, Carol", "target": "Lin, Jionghao", "weight": 1}, {"source": "Forsyth, Carol", "target": "Sabatini, John", "weight": 1}, {"source": "Forsyth, Carol", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Forsyth, Carol", "target": "Zhang, Liang", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Hollander, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Hu, Xiangen", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Jiang, Yang", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Lin, Jionghao", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Sabatini, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Zhang, Liang", "weight": 1}, {"source": "Hollander, John", "target": "Hu, Xiangen", "weight": 1}, {"source": "Hollander, John", "target": "Jiang, Yang", "weight": 1}, {"source": "Hollander, John", "target": "Lin, Jionghao", "weight": 1}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 1}, {"source": "Hollander, John", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Hollander, John", "target": "Zhang, Liang", "weight": 1}, {"source": "Hu, Xiangen", "target": "Jiang, Yang", "weight": 1}, {"source": "Hu, Xiangen", "target": "Lin, Jionghao", "weight": 1}, {"source": "Hu, Xiangen", "target": "Sabatini, John", "weight": 1}, {"source": "Hu, Xiangen", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Hu, Xiangen", "target": "Zhang, Liang", "weight": 1}, {"source": "Jiang, Yang", "target": "Lin, Jionghao", "weight": 1}, {"source": "Jiang, Yang", "target": "Sabatini, John", "weight": 1}, {"source": "Jiang, Yang", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Jiang, Yang", "target": "Zhang, Liang", "weight": 1}, {"source": "Lin, Jionghao", "target": "Sabatini, John", "weight": 1}, {"source": "Lin, Jionghao", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Lin, Jionghao", "target": "Zhang, Liang", "weight": 1}, {"source": "Sabatini, John", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Sabatini, John", "target": "Zhang, Liang", "weight": 1}, {"source": "Zapata-Rivera, Diego", "target": "Zhang, Liang", "weight": 1}, {"source": "Espinosa-Hernandez, Graciela", "target": "Fountain, Caitlin", "weight": 1}, {"source": "Espinosa-Hernandez, Graciela", "target": "Hollander, John", "weight": 1}, {"source": "Espinosa-Hernandez, Graciela", "target": "Mohamed, Noraan A", "weight": 1}, {"source": "Fountain, Caitlin", "target": "Hollander, John", "weight": 1}, {"source": "Fountain, Caitlin", "target": "Mohamed, Noraan A", "weight": 1}, {"source": "Hollander, John", "target": "Mohamed, Noraan A", "weight": 1}], "author_papers": {"Lecci, Len": 1, "Hollander, JOHN": 1, "Key, DALE": 1, "Keith, JULIAN": 1, "Dark-Freudeman, Alissa": 2, "Terry, Christian": 1, "Fleming, Jason": 1, "Hollander, John": 21, "Bensadon, Benjamin": 1, "Smith, E Halle": 1, "Graesser, Art C": 1, "Sabatini, John": 14, "Hu, Xiangen": 4, "Graesser, Art": 3, "Huette, Stephanie": 1, "Hasan, Mahbubul": 1, "Deng, Lih Y": 1, "Bowman, Dale": 1, "Yang, Ching-Chi": 1, "O'Reilly, Tenaha": 2, "Greenberg, Daphne": 1, "Frijters, Jan": 1, "Graesser, Arthur C": 3, "Olney, Andrew": 3, "Zhang, Liang": 4, "Lin, Jionghao": 3, "Borchers, Conrad": 2, "Cao, Meng": 2, "Hollander, John M": 1, "Weitekamp, Daniel": 1, "Jain, Yoshee": 1, "He, Amber": 1, "Tang, Sunny": 1, "Zapata-Rivera, Diego": 1, "Forsyth, Carol": 1, "Jiang, Yang": 1, "Fountain, Caitlin": 1, "Mohamed, Noraan A": 1, "Espinosa-Hernandez, Graciela": 1}};
+        const institutionalData = {"Sabatini, John": {"color": "#003087", "institution": "University of Memphis", "borderColor": "#8D9093"}, "Graesser, Arthur C": {"color": "#003087", "institution": "University of Memphis", "borderColor": "#8D9093"}, "Hu, Xiangen": {"color": "#003087", "institution": "University of Memphis", "borderColor": "#8D9093"}, "Zhang, Liang": {"color": "#003087", "institution": "University of Memphis", "borderColor": "#8D9093"}, "Smith, E Halle": {"color": "#003087", "institution": "University of Memphis", "borderColor": "#8D9093"}, "Olney, Andrew": {"color": "#003087", "institution": "University of Memphis", "borderColor": "#8D9093"}, "Huette, Stephanie": {"color": "#003087", "institution": "University of Memphis", "borderColor": "#8D9093"}, "Hasan, Mahbubul": {"color": "#003087", "institution": "University of Memphis", "borderColor": "#8D9093"}, "Deng, Lih Y": {"color": "#003087", "institution": "University of Memphis", "borderColor": "#8D9093"}, "Bowman, Dale": {"color": "#003087", "institution": "University of Memphis", "borderColor": "#8D9093"}, "Yang, Ching-Chi": {"color": "#003087", "institution": "University of Memphis", "borderColor": "#8D9093"}, "Dark-Freudeman, Alissa": {"color": "#006666", "institution": "UNC Wilmington", "borderColor": "#FFB81C"}, "Lecci, Len": {"color": "#006666", "institution": "UNC Wilmington", "borderColor": "#FFB81C"}, "Key, DALE": {"color": "#006666", "institution": "UNC Wilmington", "borderColor": "#FFB81C"}, "Keith, JULIAN": {"color": "#006666", "institution": "UNC Wilmington", "borderColor": "#FFB81C"}, "Terry, Christian": {"color": "#006666", "institution": "UNC Wilmington", "borderColor": "#FFB81C"}, "Fleming, Jason": {"color": "#006666", "institution": "UNC Wilmington", "borderColor": "#FFB81C"}, "Fountain, Caitlin": {"color": "#006666", "institution": "UNC Wilmington", "borderColor": "#FFB81C"}, "Mohamed, Noraan A": {"color": "#006666", "institution": "UNC Wilmington", "borderColor": "#FFB81C"}, "Espinosa-Hernandez, Graciela": {"color": "#006666", "institution": "UNC Wilmington", "borderColor": "#FFB81C"}, "Cao, Meng": {"color": "#CC002B", "institution": "Carnegie Mellon University", "borderColor": "#990021"}, "Lin, Jionghao": {"color": "#CC002B", "institution": "Carnegie Mellon University", "borderColor": "#990021"}, "Borchers, Conrad": {"color": "#CC002B", "institution": "Carnegie Mellon University", "borderColor": "#990021"}, "Jain, Yoshee": {"color": "#CC002B", "institution": "Carnegie Mellon University", "borderColor": "#990021"}, "He, Amber": {"color": "#CC002B", "institution": "Carnegie Mellon University", "borderColor": "#990021"}, "Tang, Sunny": {"color": "#CC002B", "institution": "Carnegie Mellon University", "borderColor": "#990021"}, "Weitekamp, Daniel": {"color": "#CC002B", "institution": "Carnegie Mellon University", "borderColor": "#990021"}, "O'Reilly, Tenaha": {"color": "#0066B3", "institution": "Educational Testing Service", "borderColor": "#004C85"}, "Zapata-Rivera, Diego": {"color": "#0066B3", "institution": "Educational Testing Service", "borderColor": "#004C85"}, "Forsyth, Carol": {"color": "#0066B3", "institution": "Educational Testing Service", "borderColor": "#004C85"}, "Jiang, Yang": {"color": "#0066B3", "institution": "Educational Testing Service", "borderColor": "#004C85"}, "Greenberg, Daphne": {"color": "#0039A6", "institution": "Georgia State University", "borderColor": "#FFFFFF"}, "Frijters, Jan": {"color": "#C8102E", "institution": "Brock University", "borderColor": "#960823"}, "Bensadon, Benjamin": {"color": "#0021A5", "institution": "University of Florida", "borderColor": "#FA4616"}, "Hollander, John": {"color": "#CC0033", "institution": "Arkansas State University", "borderColor": "#990026"}};
+        
+        const nodes = [{"id": "Hollander, John", "label": "Hollander, John", "papers": 21, "isJohn": true, "x": 0, "y": 0, "vx": 0, "vy": 0}, {"id": "Sabatini, John", "label": "Sabatini, John", "papers": 11, "isJohn": false, "x": 100.0, "y": 0.0, "vx": 0, "vy": 0}, {"id": "Graesser, Arthur C", "label": "Graesser, Arthur C", "papers": 7, "isJohn": false, "x": 50.000000000000014, "y": 86.60254037844386, "vx": 0, "vy": 0}, {"id": "Hu, Xiangen", "label": "Hu, Xiangen", "papers": 4, "isJohn": false, "x": -49.99999999999998, "y": 86.60254037844388, "vx": 0, "vy": 0}, {"id": "Zhang, Liang", "label": "Zhang, Liang", "papers": 4, "isJohn": false, "x": -100.0, "y": 1.2246467991473532e-14, "vx": 0, "vy": 0}, {"id": "Olney, Andrew", "label": "Olney, Andrew", "papers": 3, "isJohn": false, "x": -50.00000000000004, "y": -86.60254037844383, "vx": 0, "vy": 0}, {"id": "Lin, Jionghao", "label": "Lin, Jionghao", "papers": 3, "isJohn": false, "x": 50.000000000000014, "y": -86.60254037844386, "vx": 0, "vy": 0}, {"id": "Dark-Freudeman, Alissa", "label": "Dark-Freudeman, Alissa", "papers": 2, "isJohn": false, "x": 208.0, "y": 0.0, "vx": 0, "vy": 0}, {"id": "Borchers, Conrad", "label": "Borchers, Conrad", "papers": 2, "isJohn": false, "x": 179.69818225065595, "y": 39.55456099882843, "vx": 0, "vy": 0}, {"id": "Cao, Meng", "label": "Cao, Meng", "papers": 2, "isJohn": false, "x": 173.34690515715278, "y": 80.19881839801054, "vx": 0, "vy": 0}, {"id": "Lecci, Len", "label": "Lecci, Len", "papers": 1, "isJohn": false, "x": 160.0147062068344, "y": 121.6400172539468, "vx": 0, "vy": 0}, {"id": "Key, DALE", "label": "Key, DALE", "papers": 1, "isJohn": false, "x": 117.17691754551082, "y": 137.9513319781022, "vx": 0, "vy": 0}, {"id": "Keith, JULIAN", "label": "Keith, JULIAN", "papers": 1, "isJohn": false, "x": 97.89736410625615, "y": 184.65401728921879, "vx": 0, "vy": 0}, {"id": "Terry, Christian", "label": "Terry, Christian", "papers": 1, "isJohn": false, "x": 51.90049767466887, "y": 186.92869854872924, "vx": 0, "vy": 0}, {"id": "Fleming, Jason", "label": "Fleming, Jason", "papers": 1, "isJohn": false, "x": 10.990198442839775, "y": 202.70228301177812, "vx": 0, "vy": 0}, {"id": "Bensadon, Benjamin", "label": "Bensadon, Benjamin", "papers": 1, "isJohn": false, "x": -31.223925334683592, "y": 190.45751885051453, "vx": 0, "vy": 0}, {"id": "Smith, E Halle", "label": "Smith, E Halle", "papers": 1, "isJohn": false, "x": -68.10542058254426, "y": 170.9317164462896, "vx": 0, "vy": 0}, {"id": "Huette, Stephanie", "label": "Huette, Stephanie", "papers": 1, "isJohn": false, "x": -116.72690959537552, "y": 172.15931161663323, "vx": 0, "vy": 0}, {"id": "Hasan, Mahbubul", "label": "Hasan, Mahbubul", "papers": 1, "isJohn": false, "x": -145.19909838462613, "y": 137.5398917706847, "vx": 0, "vy": 0}, {"id": "Deng, Lih Y", "label": "Deng, Lih Y", "papers": 1, "isJohn": false, "x": -162.80286347184193, "y": 97.9552328636342, "vx": 0, "vy": 0}, {"id": "Bowman, Dale", "label": "Bowman, Dale", "papers": 1, "isJohn": false, "x": -172.47287715527003, "y": 58.1128784847484, "vx": 0, "vy": 0}, {"id": "Yang, Ching-Chi", "label": "Yang, Ching-Chi", "papers": 1, "isJohn": false, "x": -194.85103960225447, "y": 21.191327611092618, "vx": 0, "vy": 0}, {"id": "Greenberg, Daphne", "label": "Greenberg, Daphne", "papers": 1, "isJohn": false, "x": -202.80414325948936, "y": -22.056279758484102, "vx": 0, "vy": 0}, {"id": "O\u2019Reilly, Tenaha", "label": "O\u2019Reilly, Tenaha", "papers": 1, "isJohn": false, "x": -185.74002155182927, "y": -62.58309990665207, "vx": 0, "vy": 0}, {"id": "Frijters, Jan", "label": "Frijters, Jan", "papers": 1, "isJohn": false, "x": -167.08714935267994, "y": -100.53300214951918, "vx": 0, "vy": 0}, {"id": "O'Reilly, Tenaha", "label": "O'Reilly, Tenaha", "papers": 1, "isJohn": false, "x": -137.93914346539484, "y": -130.66289718215046, "vx": 0, "vy": 0}, {"id": "Weitekamp, Daniel", "label": "Weitekamp, Daniel", "papers": 1, "isJohn": false, "x": -114.48216133392603, "y": -168.84855562400566, "vx": 0, "vy": 0}, {"id": "Jain, Yoshee", "label": "Jain, Yoshee", "papers": 1, "isJohn": false, "x": -67.73528242720434, "y": -170.00273972647284, "vx": 0, "vy": 0}, {"id": "He, Amber", "label": "He, Amber", "papers": 1, "isJohn": false, "x": -33.812437279527835, "y": -206.24674321117897, "vx": 0, "vy": 0}, {"id": "Tang, Sunny", "label": "Tang, Sunny", "papers": 1, "isJohn": false, "x": 10.50294826557084, "y": -193.71548228711805, "vx": 0, "vy": 0}, {"id": "Zapata-Rivera, Diego", "label": "Zapata-Rivera, Diego", "papers": 1, "isJohn": false, "x": 54.308252721431856, "y": -195.60064848140226, "vx": 0, "vy": 0}, {"id": "Forsyth, Carol", "label": "Forsyth, Carol", "papers": 1, "isJohn": false, "x": 91.33964593645896, "y": -172.28484866697454, "vx": 0, "vy": 0}, {"id": "Jiang, Yang", "label": "Jiang, Yang", "papers": 1, "isJohn": false, "x": 129.47725695636544, "y": -152.43241102552736, "vx": 0, "vy": 0}, {"id": "Fountain, Caitlin", "label": "Fountain, Caitlin", "papers": 1, "isJohn": false, "x": 160.81079927253998, "y": -122.24519146914065, "vx": 0, "vy": 0}, {"id": "Mohamed, Noraan A", "label": "Mohamed, Noraan A", "papers": 1, "isJohn": false, "x": 176.06963141616563, "y": -81.45848570269139, "vx": 0, "vy": 0}, {"id": "Espinosa-Hernandez, Graciela", "label": "Espinosa-Hernandez, Graciela", "papers": 1, "isJohn": false, "x": 178.72156169494585, "y": -39.33959055861746, "vx": 0, "vy": 0}];
+        
+        const edges = [{"source": "Hollander, John", "target": "Lecci, Len", "weight": 1}, {"source": "Key, DALE", "target": "Lecci, Len", "weight": 1}, {"source": "Keith, JULIAN", "target": "Lecci, Len", "weight": 1}, {"source": "Hollander, John", "target": "Key, DALE", "weight": 1}, {"source": "Hollander, John", "target": "Keith, JULIAN", "weight": 1}, {"source": "Keith, JULIAN", "target": "Key, DALE", "weight": 1}, {"source": "Dark-Freudeman, Alissa", "target": "Terry, Christian", "weight": 1}, {"source": "Dark-Freudeman, Alissa", "target": "Fleming, Jason", "weight": 1}, {"source": "Dark-Freudeman, Alissa", "target": "Hollander, John", "weight": 2}, {"source": "Bensadon, Benjamin", "target": "Dark-Freudeman, Alissa", "weight": 1}, {"source": "Fleming, Jason", "target": "Terry, Christian", "weight": 1}, {"source": "Hollander, John", "target": "Terry, Christian", "weight": 1}, {"source": "Bensadon, Benjamin", "target": "Terry, Christian", "weight": 1}, {"source": "Fleming, Jason", "target": "Hollander, John", "weight": 1}, {"source": "Bensadon, Benjamin", "target": "Fleming, Jason", "weight": 1}, {"source": "Bensadon, Benjamin", "target": "Hollander, John", "weight": 1}, {"source": "Hollander, John", "target": "Smith, E Halle", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Smith, E Halle", "weight": 1}, {"source": "Sabatini, John", "target": "Smith, E Halle", "weight": 1}, {"source": "Hu, Xiangen", "target": "Smith, E Halle", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Hollander, John", "weight": 7}, {"source": "Hollander, John", "target": "Sabatini, John", "weight": 11}, {"source": "Hollander, John", "target": "Hu, Xiangen", "weight": 4}, {"source": "Graesser, Arthur C", "target": "Sabatini, John", "weight": 7}, {"source": "Graesser, Arthur C", "target": "Hu, Xiangen", "weight": 3}, {"source": "Hu, Xiangen", "target": "Sabatini, John", "weight": 4}, {"source": "Hollander, John", "target": "Huette, Stephanie", "weight": 1}, {"source": "Deng, Lih Y", "target": "Hasan, Mahbubul", "weight": 1}, {"source": "Hasan, Mahbubul", "target": "Sabatini, John", "weight": 1}, {"source": "Bowman, Dale", "target": "Hasan, Mahbubul", "weight": 1}, {"source": "Hasan, Mahbubul", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Hasan, Mahbubul", "target": "Hollander, John", "weight": 1}, {"source": "Deng, Lih Y", "target": "Sabatini, John", "weight": 1}, {"source": "Bowman, Dale", "target": "Deng, Lih Y", "weight": 1}, {"source": "Deng, Lih Y", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Deng, Lih Y", "target": "Hollander, John", "weight": 1}, {"source": "Bowman, Dale", "target": "Sabatini, John", "weight": 1}, {"source": "Sabatini, John", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Bowman, Dale", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Bowman, Dale", "target": "Hollander, John", "weight": 1}, {"source": "Hollander, John", "target": "Yang, Ching-Chi", "weight": 1}, {"source": "Greenberg, Daphne", "target": "Hollander, John", "weight": 1}, {"source": "Hollander, John", "target": "O\u2019Reilly, Tenaha", "weight": 1}, {"source": "Frijters, Jan", "target": "Hollander, John", "weight": 1}, {"source": "Greenberg, Daphne", "target": "Sabatini, John", "weight": 1}, {"source": "O\u2019Reilly, Tenaha", "target": "Sabatini, John", "weight": 1}, {"source": "Frijters, Jan", "target": "Sabatini, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Greenberg, Daphne", "weight": 1}, {"source": "Graesser, Arthur C", "target": "O\u2019Reilly, Tenaha", "weight": 1}, {"source": "Frijters, Jan", "target": "Graesser, Arthur C", "weight": 1}, {"source": "Greenberg, Daphne", "target": "O\u2019Reilly, Tenaha", "weight": 1}, {"source": "Frijters, Jan", "target": "Greenberg, Daphne", "weight": 1}, {"source": "Frijters, Jan", "target": "O\u2019Reilly, Tenaha", "weight": 1}, {"source": "O'Reilly, Tenaha", "target": "Sabatini, John", "weight": 1}, {"source": "Graesser, Arthur C", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Hollander, John", "target": "O'Reilly, Tenaha", "weight": 1}, {"source": "Hollander, John", "target": "Olney, Andrew", "weight": 3}, {"source": "Lin, Jionghao", "target": "Zhang, Liang", "weight": 3}, {"source": "Borchers, Conrad", "target": "Zhang, Liang", "weight": 2}, {"source": "Sabatini, John", "target": "Zhang, Liang", "weight": 4}, {"source": "Hollander, John", "target": "Zhang, Liang", "weight": 4}, {"source": "Cao, Meng", "target": "Zhang, Liang", "weight": 2}, {"source": "Hu, Xiangen", "target": "Zhang, Liang", "weight": 3}, {"source": "Borchers, Conrad", "target": "Lin, Jionghao", "weight": 2}, {"source": "Lin, Jionghao", "target": "Sabatini, John", "weight": 3}, {"source": "Hollander, John", "target": "Lin, Jionghao", "weight": 3}, {"source": "Cao, Meng", "target": "Lin, Jionghao", "weight": 2}, {"source": "Hu, Xiangen", "target": "Lin, Jionghao", "weight": 3}, {"source": "Borchers, Conrad", "target": "Sabatini, John", "weight": 2}, {"source": "Borchers, Conrad", "target": "Hollander, John", "weight": 2}, {"source": "Borchers, Conrad", "target": "Cao, Meng", "weight": 2}, {"source": "Borchers, Conrad", "target": "Hu, Xiangen", "weight": 2}, {"source": "Cao, Meng", "target": "Sabatini, John", "weight": 2}, {"source": "Cao, Meng", "target": "Hollander, John", "weight": 2}, {"source": "Cao, Meng", "target": "Hu, Xiangen", "weight": 2}, {"source": "Weitekamp, Daniel", "target": "Zhang, Liang", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Zhang, Liang", "weight": 2}, {"source": "Lin, Jionghao", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Lin, Jionghao", "weight": 2}, {"source": "Sabatini, John", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Borchers, Conrad", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Borchers, Conrad", "target": "Graesser, Arthur C", "weight": 1}, {"source": "Cao, Meng", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Hollander, John", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Hu, Xiangen", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Weitekamp, Daniel", "weight": 1}, {"source": "Cao, Meng", "target": "Graesser, Arthur C", "weight": 1}, {"source": "Hollander, John", "target": "Jain, Yoshee", "weight": 1}, {"source": "He, Amber", "target": "Jain, Yoshee", "weight": 1}, {"source": "Jain, Yoshee", "target": "Tang, Sunny", "weight": 1}, {"source": "Jain, Yoshee", "target": "Zhang, Liang", "weight": 1}, {"source": "Jain, Yoshee", "target": "Sabatini, John", "weight": 1}, {"source": "He, Amber", "target": "Hollander, John", "weight": 1}, {"source": "Hollander, John", "target": "Tang, Sunny", "weight": 1}, {"source": "He, Amber", "target": "Tang, Sunny", "weight": 1}, {"source": "He, Amber", "target": "Zhang, Liang", "weight": 1}, {"source": "He, Amber", "target": "Sabatini, John", "weight": 1}, {"source": "Tang, Sunny", "target": "Zhang, Liang", "weight": 1}, {"source": "Sabatini, John", "target": "Tang, Sunny", "weight": 1}, {"source": "Zapata-Rivera, Diego", "target": "Zhang, Liang", "weight": 1}, {"source": "Forsyth, Carol", "target": "Zhang, Liang", "weight": 1}, {"source": "Jiang, Yang", "target": "Zhang, Liang", "weight": 1}, {"source": "Lin, Jionghao", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Forsyth, Carol", "target": "Lin, Jionghao", "weight": 1}, {"source": "Jiang, Yang", "target": "Lin, Jionghao", "weight": 1}, {"source": "Sabatini, John", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Forsyth, Carol", "target": "Sabatini, John", "weight": 1}, {"source": "Jiang, Yang", "target": "Sabatini, John", "weight": 1}, {"source": "Forsyth, Carol", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Jiang, Yang", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Hollander, John", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Hu, Xiangen", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Zapata-Rivera, Diego", "weight": 1}, {"source": "Forsyth, Carol", "target": "Jiang, Yang", "weight": 1}, {"source": "Forsyth, Carol", "target": "Hollander, John", "weight": 1}, {"source": "Forsyth, Carol", "target": "Hu, Xiangen", "weight": 1}, {"source": "Forsyth, Carol", "target": "Graesser, Arthur C", "weight": 1}, {"source": "Hollander, John", "target": "Jiang, Yang", "weight": 1}, {"source": "Hu, Xiangen", "target": "Jiang, Yang", "weight": 1}, {"source": "Graesser, Arthur C", "target": "Jiang, Yang", "weight": 1}, {"source": "Fountain, Caitlin", "target": "Hollander, John", "weight": 1}, {"source": "Hollander, John", "target": "Mohamed, Noraan A", "weight": 1}, {"source": "Espinosa-Hernandez, Graciela", "target": "Hollander, John", "weight": 1}, {"source": "Fountain, Caitlin", "target": "Mohamed, Noraan A", "weight": 1}, {"source": "Espinosa-Hernandez, Graciela", "target": "Fountain, Caitlin", "weight": 1}, {"source": "Espinosa-Hernandez, Graciela", "target": "Mohamed, Noraan A", "weight": 1}];
 
-        // Initialize network
-        const johnVariants = ['Hollander, John', 'Hollander, JOHN', 'Hollander, John M'];
-        const mainJohn = 'Hollander, John';
-        
-        // Merge collaborations
-        const mergedCollabs = new Map();
-        networkData.coauthorships.forEach(edge => {
-            let source = johnVariants.includes(edge.source) ? mainJohn : edge.source;
-            let target = johnVariants.includes(edge.target) ? mainJohn : edge.target;
-            const key = [source, target].sort().join('|');
-            mergedCollabs.set(key, (mergedCollabs.get(key) || 0) + edge.weight);
-        });
-        
-        // Create nodes
-        const uniqueAuthors = Array.from(new Set(
-            networkData.authors.map(a => johnVariants.includes(a) ? mainJohn : a)
-        ));
-        
-        const nodes = uniqueAuthors.map((author, i) => {
-            const angle = (i / uniqueAuthors.length) * Math.PI * 2;
-            const radius = 200;
-            return {
-                id: author,
-                label: author,
-                papers: networkData.author_papers[author] || 0,
-                x: Math.cos(angle) * radius,
-                y: Math.sin(angle) * radius,
-                vx: 0,
-                vy: 0,
-                isJohn: author === mainJohn
-            };
-        });
-        
-        const edges = Array.from(mergedCollabs.entries()).map(([key, weight]) => {
-            const [source, target] = key.split('|');
-            return { source, target, weight };
-        });
+        // Initialize positions - already set in node data with smart layout
+        const width = 1000;
+        const height = 700;
         
         // Canvas setup
         const canvas = document.getElementById('networkCanvas');
         const ctx = canvas.getContext('2d');
-        let transform = { x: 500, y: 350, scale: 1 };
+        let transform = { x: width / 2, y: height / 2, scale: 1 };
         let selectedNode = null;
         let hoveredNode = null;
-        let isDragging = false;
-        let draggedNode = null;
+        let isPanning = false;
+        let panStart = { x: 0, y: 0 };
         
-        // Force simulation
+        // Force simulation - FASTER STABILIZATION
         function simulate() {
-            const alpha = 0.05;
-            const repulsion = 15000;
-            const attraction = 0.008;
-            const damping = 0.85;
+            const alpha = 0.08;  // Increased from 0.05 for faster movement
+            const repulsion = 12000;  // Reduced from 15000 for less scatter
+            const attraction = 0.01;  // Increased from 0.008 for tighter clusters
+            const damping = 0.88;  // Increased from 0.85 for faster settling
             
             // Repulsion
             nodes.forEach(node => {
@@ -226,7 +196,6 @@
             
             // Update positions
             nodes.forEach(node => {
-                if (draggedNode && node.id === draggedNode.id) return;
                 node.vx *= damping;
                 node.vy *= damping;
                 node.x += node.vx * alpha;
@@ -247,10 +216,13 @@
                 const target = nodes.find(n => n.id === edge.target);
                 if (!source || !target) return;
                 
-                const opacity = 0.3 + (edge.weight / 15) * 0.6;
-                ctx.strokeStyle = `rgba(100, 116, 139, ${opacity})`;
+                const isHighlighted = selectedNode && 
+                    (edge.source === selectedNode || edge.target === selectedNode);
+                
+                const opacity = isHighlighted ? 0.8 : (0.3 + (edge.weight / 15) * 0.6);
+                ctx.strokeStyle = isHighlighted ? 'rgba(59, 130, 246, 0.8)' : `rgba(100, 116, 139, ${opacity})`;
                 const calculatedWidth = 1 + (edge.weight * 0.8);
-                ctx.lineWidth = Math.min(calculatedWidth, 8);
+                ctx.lineWidth = isHighlighted ? calculatedWidth * 1.5 : Math.min(calculatedWidth, 8);
                 ctx.beginPath();
                 ctx.moveTo(source.x, source.y);
                 ctx.lineTo(target.x, target.y);
@@ -271,25 +243,31 @@
                     );
                 }
                 
+                // Get institutional colors
+                const nodeData = institutionalData[node.id];
+                const baseColor = nodeData ? nodeData.color : '#93c5fd';
+                const borderColor = nodeData && nodeData.borderColor ? nodeData.borderColor : darkenColor(baseColor, 20);
+                
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
                 
-                if (node.isJohn) {
-                    ctx.fillStyle = '#dc2626';
-                } else if (isSelected) {
+                // Fill color based on state
+                if (isSelected) {
                     ctx.fillStyle = '#3b82f6';
                 } else if (isHovered || isConnected) {
-                    ctx.fillStyle = '#60a5fa';
+                    ctx.fillStyle = lightenColor(baseColor, 40);
                 } else {
-                    ctx.fillStyle = '#93c5fd';
+                    ctx.fillStyle = baseColor;
                 }
                 
                 ctx.fill();
-                ctx.strokeStyle = node.isJohn ? '#991b1b' : '#1e40af';
-                ctx.lineWidth = isSelected || isHovered ? 3 : 2;
+                
+                // Border with institutional secondary color
+                ctx.strokeStyle = borderColor;
+                ctx.lineWidth = isSelected || isHovered ? 4 : 3;
                 ctx.stroke();
                 
-                // Labels - always visible
+                // Labels
                 ctx.fillStyle = '#1e293b';
                 ctx.font = node.isJohn ? 'bold 14px sans-serif' : 'bold 11px sans-serif';
                 ctx.textAlign = 'center';
@@ -297,6 +275,23 @@
             });
             
             ctx.restore();
+        }
+        
+        // Color manipulation helpers
+        function lightenColor(hex, percent) {
+            const num = parseInt(hex.slice(1), 16);
+            const r = Math.min(255, ((num >> 16) & 255) + Math.floor(255 * percent / 100));
+            const g = Math.min(255, ((num >> 8) & 255) + Math.floor(255 * percent / 100));
+            const b = Math.min(255, (num & 255) + Math.floor(255 * percent / 100));
+            return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+        }
+        
+        function darkenColor(hex, percent) {
+            const num = parseInt(hex.slice(1), 16);
+            const r = Math.max(0, ((num >> 16) & 255) - Math.floor(255 * percent / 100));
+            const g = Math.max(0, ((num >> 8) & 255) - Math.floor(255 * percent / 100));
+            const b = Math.max(0, (num & 255) - Math.floor(255 * percent / 100));
+            return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
         }
         
         // Animation loop
@@ -312,21 +307,23 @@
             const rect = canvas.getBoundingClientRect();
             return {
                 x: (e.clientX - rect.left - transform.x) / transform.scale,
-                y: (e.clientY - rect.top - transform.y) / transform.scale
+                y: (e.clientY - rect.top - transform.y) / transform.scale,
+                screenX: e.clientX - rect.left,
+                screenY: e.clientY - rect.top
             };
         }
         
         canvas.addEventListener('mousemove', (e) => {
             const pos = getMousePos(e);
             
-            if (isDragging && draggedNode) {
-                draggedNode.x = pos.x;
-                draggedNode.y = pos.y;
-                draggedNode.vx = 0;
-                draggedNode.vy = 0;
+            // Handle panning
+            if (isPanning) {
+                transform.x = pos.screenX - panStart.x;
+                transform.y = pos.screenY - panStart.y;
                 return;
             }
             
+            // Handle hover
             hoveredNode = null;
             for (const node of nodes) {
                 const radius = node.isJohn ? 18 : 6 + Math.sqrt(node.papers) * 2.5;
@@ -341,30 +338,13 @@
         canvas.addEventListener('mousedown', (e) => {
             const pos = getMousePos(e);
             
+            // Check if clicking on a node
+            let clickedNode = false;
             for (const node of nodes) {
                 const radius = node.isJohn ? 18 : 6 + Math.sqrt(node.papers) * 2.5;
                 const dist = Math.sqrt((pos.x - node.x) ** 2 + (pos.y - node.y) ** 2);
                 if (dist < radius) {
-                    isDragging = true;
-                    draggedNode = node;
-                    break;
-                }
-            }
-        });
-        
-        canvas.addEventListener('mouseup', () => {
-            isDragging = false;
-            draggedNode = null;
-        });
-        
-        canvas.addEventListener('click', (e) => {
-            const pos = getMousePos(e);
-            
-            selectedNode = null;
-            for (const node of nodes) {
-                const radius = node.isJohn ? 18 : 6 + Math.sqrt(node.papers) * 2.5;
-                const dist = Math.sqrt((pos.x - node.x) ** 2 + (pos.y - node.y) ** 2);
-                if (dist < radius) {
+                    clickedNode = true;
                     selectedNode = node.id;
                     
                     // Update info panel
@@ -372,8 +352,11 @@
                         e.source === selectedNode || e.target === selectedNode
                     );
                     const totalPapers = collabs.reduce((sum, e) => sum + e.weight, 0);
+                    const nodeData = institutionalData[selectedNode];
                     
                     document.getElementById('selectedAuthor').textContent = selectedNode;
+                    document.getElementById('institutionValue').textContent = 
+                        nodeData ? nodeData.institution : 'Unknown';
                     document.getElementById('collabValue').textContent = collabs.length;
                     document.getElementById('papersValue').textContent = totalPapers;
                     document.getElementById('infoPanel').classList.add('active');
@@ -381,15 +364,40 @@
                 }
             }
             
-            if (!selectedNode) {
+            // If not clicking on node, start panning
+            if (!clickedNode) {
+                isPanning = true;
+                panStart.x = pos.screenX - transform.x;
+                panStart.y = pos.screenY - transform.y;
+                selectedNode = null;
                 document.getElementById('infoPanel').classList.remove('active');
             }
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            isPanning = false;
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            isPanning = false;
         });
         
         canvas.addEventListener('wheel', (e) => {
             e.preventDefault();
             const delta = e.deltaY > 0 ? 0.9 : 1.1;
-            transform.scale = Math.max(0.3, Math.min(3, transform.scale * delta));
+            const newScale = Math.max(0.3, Math.min(3, transform.scale * delta));
+            
+            // Zoom towards mouse position
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            const worldX = (mouseX - transform.x) / transform.scale;
+            const worldY = (mouseY - transform.y) / transform.scale;
+            
+            transform.scale = newScale;
+            transform.x = mouseX - worldX * transform.scale;
+            transform.y = mouseY - worldY * transform.scale;
         });
     </script>
 </body>
